@@ -1,230 +1,90 @@
-import { EllipsisOutlined } from '@ant-design/icons';
-import { Col, Dropdown, Menu, Row } from 'antd';
-import React, { Component, Suspense } from 'react';
-import { GridContent } from '@ant-design/pro-layout';
-import { RadioChangeEvent } from 'antd/es/radio';
-import { RangePickerProps } from 'antd/es/date-picker/generatePicker';
-import moment from 'moment';
-import { connect, Dispatch } from 'umi';
+import React, { useState, useEffect } from 'react';
+import { Line } from '@ant-design/charts';
+import {PageContainer} from '@ant-design/pro-layout';
+import ProCard from '@ant-design/pro-card';
+import { Row, Col,Divider,Button   } from 'antd';
+import { Fullscreen } from '@alitajs/antd-plus';
 
-import PageLoading from './components/PageLoading';
-import { getTimeDistance } from './utils/utils';
-import { AnalysisData } from './data.d';
-import styles from './style.less';
 
-const IntroduceRow = React.lazy(() => import('./components/IntroduceRow'));
-const SalesCard = React.lazy(() => import('./components/SalesCard'));
-const TopSearch = React.lazy(() => import('./components/TopSearch'));
-const ProportionSales = React.lazy(() => import('./components/ProportionSales'));
-const OfflineData = React.lazy(() => import('./components/OfflineData'));
-
-type RangePickerValue = RangePickerProps<moment.Moment>['value'];
-
-interface DashboardAnalysisProps {
-  dashboardAnalysis: AnalysisData;
-  dispatch: Dispatch<any>;
-  loading: boolean;
-}
-
-interface DashboardAnalysisState {
-  salesType: 'all' | 'online' | 'stores';
-  currentTabKey: string;
-  rangePickerValue: RangePickerValue;
-}
-
-class DashboardAnalysis extends Component<
-  DashboardAnalysisProps,
-  DashboardAnalysisState
-> {
-  state: DashboardAnalysisState = {
-    salesType: 'all',
-    currentTabKey: '',
-    rangePickerValue: getTimeDistance('year'),
+const DemoLine: React.FC = () => {
+  const [enabled, setEnabled] = React.useState(false);
+  const handleClick = () => {
+    setEnabled(!enabled);
   };
 
-  reqRef: number = 0;
-
-  timeoutId: number = 0;
-
-  componentDidMount() {
-    const { dispatch } = this.props;
-    this.reqRef = requestAnimationFrame(() => {
-      dispatch({
-        type: 'dashboardAnalysis/fetch',
+  const [data, setData] = useState([]);
+  useEffect(() => {
+    asyncFetch();
+  }, []);
+  const asyncFetch = () => {
+    fetch('https://gw.alipayobjects.com/os/bmw-prod/55424a73-7cb8-4f79-b60d-3ab627ac5698.json')
+      .then((response) => response.json())
+      .then((json) => setData(json))
+      .catch((error) => {
+        console.log('fetch data failed', error);
       });
-    });
-  }
-
-  componentWillUnmount() {
-    const { dispatch } = this.props;
-    dispatch({
-      type: 'dashboardAnalysis/clear',
-    });
-    cancelAnimationFrame(this.reqRef);
-    clearTimeout(this.timeoutId);
-  }
-
-  handleChangeSalesType = (e: RadioChangeEvent) => {
-    this.setState({
-      salesType: e.target.value,
-    });
   };
-
-  handleTabChange = (key: string) => {
-    this.setState({
-      currentTabKey: key,
-    });
+  var config = {
+    data: data,
+    xField: 'year',
+    yField: 'value',
+    seriesField: 'category',
+    yAxis: {
+      label: {
+        formatter: function formatter(v) {
+          return ''.concat(v).replace(/\d{1,3}(?=(\d{3})+$)/g, function (s) {
+            return ''.concat(s, ',');
+          });
+        },
+      },
+    },
+    color: ['#1979C9', '#D62A0D', '#FAA219'],
   };
+  return  (
+    <Fullscreen
+      enabled={enabled}
+      target={document.documentElement}
+      onClose={(error) => {
+        console.log('close');
+      }}
+    >
+      <PageContainer>
+        <div ><Button onClick={handleClick}>切换全屏</Button></div>
+        <Row gutter={24}>
+          <Col  span={6}>
+            <ProCard title="PV统计"  tooltip="PV">
+              100
+            </ProCard>
+          </Col>
+          <Col  span={6}>
+            <ProCard title="UV统计"  tooltip="UV">
+              100
+            </ProCard>
+          </Col>
+          <Col span={6}>
+            <ProCard title="注册人数"  tooltip="PV">
+              100
+            </ProCard>
+          </Col>
+          <Col span={6}>
+            <ProCard title="今日注册人数"  tooltip="PV">
+              100
+            </ProCard>
+          </Col>
+        </Row>
+        <Divider orientation="left">Horizontal</Divider>
+        <Row gutter={16}>
+          <Col  span={24}>
+            <ProCard title="流量统计"  tooltip="PV">
+              <Line {...config} />
+            </ProCard>
+          </Col>
+        </Row>
+      </PageContainer>
 
-  handleRangePickerChange = (rangePickerValue: RangePickerValue) => {
-    const { dispatch } = this.props;
-    this.setState({
-      rangePickerValue,
-    });
 
-    dispatch({
-      type: 'dashboardAnalysis/fetchSalesData',
-    });
-  };
+    </Fullscreen>
+  )
 
-  selectDate = (type: 'today' | 'week' | 'month' | 'year') => {
-    const { dispatch } = this.props;
-    this.setState({
-      rangePickerValue: getTimeDistance(type),
-    });
-
-    dispatch({
-      type: 'dashboardAnalysis/fetchSalesData',
-    });
-  };
-
-  isActive = (type: 'today' | 'week' | 'month' | 'year') => {
-    const { rangePickerValue } = this.state;
-    if (!rangePickerValue) {
-      return '';
-    }
-    const value = getTimeDistance(type);
-    if (!value) {
-      return '';
-    }
-    if (!rangePickerValue[0] || !rangePickerValue[1]) {
-      return '';
-    }
-    if (
-      rangePickerValue[0].isSame(value[0] as moment.Moment, 'day') &&
-      rangePickerValue[1].isSame(value[1] as moment.Moment, 'day')
-    ) {
-      return styles.currentDate;
-    }
-    return '';
-  };
-
-  render() {
-    const { rangePickerValue, salesType, currentTabKey } = this.state;
-    const { dashboardAnalysis, loading } = this.props;
-    const {
-      visitData,
-      visitData2,
-      salesData,
-      searchData,
-      offlineData,
-      offlineChartData,
-      salesTypeData,
-      salesTypeDataOnline,
-      salesTypeDataOffline,
-    } = dashboardAnalysis;
-    let salesPieData;
-    if (salesType === 'all') {
-      salesPieData = salesTypeData;
-    } else {
-      salesPieData = salesType === 'online' ? salesTypeDataOnline : salesTypeDataOffline;
-    }
-    const menu = (
-      <Menu>
-        <Menu.Item>操作一</Menu.Item>
-        <Menu.Item>操作二</Menu.Item>
-      </Menu>
-    );
-
-    const dropdownGroup = (
-      <span className={styles.iconGroup}>
-        <Dropdown overlay={menu} placement="bottomRight">
-          <EllipsisOutlined />
-        </Dropdown>
-      </span>
-    );
-
-    const activeKey = currentTabKey || (offlineData[0] && offlineData[0].name);
-    return (
-      <GridContent>
-        <React.Fragment>
-          <Suspense fallback={<PageLoading />}>
-            <IntroduceRow loading={loading} visitData={visitData} />
-          </Suspense>
-          <Suspense fallback={null}>
-            <SalesCard
-              rangePickerValue={rangePickerValue}
-              salesData={salesData}
-              isActive={this.isActive}
-              handleRangePickerChange={this.handleRangePickerChange}
-              loading={loading}
-              selectDate={this.selectDate}
-            />
-          </Suspense>
-          <Row
-            gutter={24}
-            style={{
-              marginTop: 24,
-            }}
-          >
-            <Col xl={12} lg={24} md={24} sm={24} xs={24}>
-              <Suspense fallback={null}>
-                <TopSearch
-                  loading={loading}
-                  visitData2={visitData2}
-                  searchData={searchData}
-                  dropdownGroup={dropdownGroup}
-                />
-              </Suspense>
-            </Col>
-            <Col xl={12} lg={24} md={24} sm={24} xs={24}>
-              <Suspense fallback={null}>
-                <ProportionSales
-                  dropdownGroup={dropdownGroup}
-                  salesType={salesType}
-                  loading={loading}
-                  salesPieData={salesPieData}
-                  handleChangeSalesType={this.handleChangeSalesType}
-                />
-              </Suspense>
-            </Col>
-          </Row>
-          <Suspense fallback={null}>
-            <OfflineData
-              activeKey={activeKey}
-              loading={loading}
-              offlineData={offlineData}
-              offlineChartData={offlineChartData}
-              handleTabChange={this.handleTabChange}
-            />
-          </Suspense>
-        </React.Fragment>
-      </GridContent>
-    );
-  }
-}
-
-export default connect(
-  ({
-    dashboardAnalysis,
-    loading,
-  }: {
-    dashboardAnalysis: any;
-    loading: {
-      effects: { [key: string]: boolean };
-    };
-  }) => ({
-    dashboardAnalysis,
-    loading: loading.effects['dashboardAnalysis/fetch'],
-  }),
-)(DashboardAnalysis);
+};
+export default DemoLine;
