@@ -9,21 +9,23 @@ import { TableListItem } from '@/services/FzBrandAdManageService/FzBrandProjectS
 import { query, save,update } from '@/services/FzBrandAdManageService/FzBrandProjectService/service';
 import { PlusOutlined } from "@ant-design/icons";
 import { history } from 'umi';
+import {findDictionaryValueEnumByDicname} from "@/services/utile";
+
 
 /**
  * 添加节点
  * @param fields
  */
-const handleAdd = async (fields: FormValueType) => {
+const handleAdd = async (fields) => {
   const hide = message.loading('正在添加');
-  const status = fields.status?0:1;
+  const status = fields.add_status?0:1;
   try {
     await save({
-      brandId: fields.brandId,
-      projectName: fields.projectName,
+      brandId: fields.add_brandId,
+      projectName: fields.add_projectName,
       // status: fields.status,
       status:status,
-      remark: fields.remark,
+      remark: fields.add_remark,
     });
     hide();
     message.success('添加成功');
@@ -63,8 +65,8 @@ const handleUpdate = async (fields: FormValueType) => {
 //  * 跳转详情页
 //  * @param id
 //  */
-const detail = function (id: number){
-  history.push('/FzBrandAdManage/FzProjectAd/list?id='+id);
+const detail = function (record){
+  history.push('/FzBrandAdManage/FzBrandProject/FzProjectAd/list?brandId='+record.brandId+"&projectId="+record.id);
 };
 
 const TableList: React.FC<{}> = () => {
@@ -73,10 +75,21 @@ const TableList: React.FC<{}> = () => {
   const [stepFormValues, setStepFormValues] = useState({});   // 修改
   const actionRef = useRef<ActionType>(); // 刷新使用
   const [row, setRow] = useState<TableListItem>();// 详情数据
+  const [category,setCategory] = useState<any>();
 
    // const { initialState } = useModel('@@initialState'); //获取初始值
   // const { currentUser } = initialState || {};
-
+  async function getType(){
+    let res = await findDictionaryValueEnumByDicname("brand");
+    if(res){
+      let categor = {};
+      for(let item of res){
+        categor[item.value] = item.label;
+      }
+      setCategory(categor)//列表字段
+      return res.map(item=>({label:item.label,value:item.value}));//查询字段
+    }
+  }
   /**
    * 页面权限处理
    */
@@ -88,10 +101,18 @@ const TableList: React.FC<{}> = () => {
       hideInTable: true,       // list页面不显示
       hideInForm: true,       // 新增页面不显示
     },
+    // {
+    //   title: '品牌名称',
+    //   dataIndex: 'xxmc',
+    //   hideInForm: true,       // 新增页面不显示
+    // },
     {
-      title: '品牌名称',
-      dataIndex: 'xxmc',
-      hideInForm: true,       // 新增页面不显示
+      title: '品牌',
+      dataIndex: 'brandId',
+      // hideInSearch: true,      // 设置搜索栏是否显示
+      // hideInTable: true,       // list页面不显示
+      valueEnum:category,//这一列是后端返回的数据，目前还没有找到好的方法可以直接让搜索框和table展示数据一致，只能外加一个valueEnum让table展示正确数据
+      request:async()=>getType(),
     },
     {
       title: '项目名称',
@@ -132,11 +153,19 @@ const TableList: React.FC<{}> = () => {
           <Divider type="vertical" />
           <a
             onClick={() => {
-              detail(record.id);
+              detail(record);
             }}
           >
-            添加广告</a>
+            广告管理</a>
+          <Divider type="vertical" />
+          <a
+            onClick={() => {
+              detail(record);
+            }}
+          >
+            数据查询</a>
         </>
+
       ),
     },
   ];
@@ -164,7 +193,6 @@ const TableList: React.FC<{}> = () => {
       <CreateForm
         onSubmit={async (value) => {
           const success = await handleAdd(value);
-          alert(success)
           if (success) {
             handleModalVisible(false);
             if (actionRef.current) {

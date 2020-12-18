@@ -19,7 +19,7 @@ export async function save(params: TableListItem) {
   });
 }
 
-export async function update(params: TableListItem) {
+export async function update(params: TableListParams) {
   return request('/api/analysis/fzbrandproject/update', {
     method: 'POST',
     data: {
@@ -30,4 +30,12 @@ export async function update(params: TableListItem) {
 }
 export async function queryFzBrandProjectByBrandId(brandId: string) {
   return await request(`/api/analysis/fzbrandproject/queryFzBrandProjectByBrandId?brandId=${brandId}`);
+}
+
+export async function queryFzBrandProjectById(Id: string) {
+  return await  request(`/api/analysis/fzbrandproject/queryFzBrandProjectById?id=${Id}`);
+}
+
+export async function queryBrandIdById(brandId: string) {
+  return await  request(`/api/analysis/fzbrandproject/queryFzBrandProjectByBrandId?brandId=${brandId}`);
 }

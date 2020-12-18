@@ -1,6 +1,7 @@
 export interface TableListItem {
   id: number;
   brandId: string;
+  projectName: string;
   projectId: string;
   adName: string;
   status: string;

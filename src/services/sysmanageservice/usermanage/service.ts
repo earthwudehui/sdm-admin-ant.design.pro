@@ -19,7 +19,7 @@ export async function saveUser(params: TableListItem) {
   });
 }
 
-export async function updateUser(params: TableListParams) {
+export async function updateUser(params: TableListItem) {
   return request('/api/sysmanage/usermanage/updateUser', {
     method: 'POST',
     data: {

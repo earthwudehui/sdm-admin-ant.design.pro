@@ -4,21 +4,20 @@ import ProForm, {
   ProFormTextArea,
   ProFormSwitch,
   ProFormText,
-  ProFormSelect
 } from '@ant-design/pro-form';
 import {TableListItem} from "@/services/FzBrandAdManageService/FzProjectAdService/data";
 
 export interface FormValueType extends Partial<TableListItem> {
 
 }
-interface UpdateFormProps {
+interface UpdateFormChannelProps {
   onCancel: () => void;
   onSubmit: (values: FormValueType) => void;
   updateModalVisible: boolean;
   values: Partial<TableListItem>;
 }
 
-const UpdateForm: React.FC<UpdateFormProps> = (props) => {
+const UpdateFormChannel: React.FC<UpdateFormChannelProps> = (props) => {
   const { updateModalVisible, onCancel,onSubmit,values } = props;
 
   return (
@@ -41,4 +40,4 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => {
   );
 };
 
-export default UpdateForm;
+export default UpdateFormChannelForm;

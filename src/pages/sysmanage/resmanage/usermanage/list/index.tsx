@@ -9,6 +9,7 @@ import { TableListItem } from '@/services/sysmanageservice/usermanage/data';
 import { queryUser, saveUser,updateUser } from '@/services/sysmanageservice/usermanage/service';
 import { PlusOutlined } from "@ant-design/icons";
 import { history } from 'umi';
+import {findDictionaryValueEnumByDicname} from "@/services/utile";
 
 /**
  * 添加节点
@@ -75,7 +76,21 @@ const TableList: React.FC<{}> = () => {
 
   // const { initialState } = useModel('@@initialState'); //获取初始值
   // const { currentUser } = initialState || {};
+  const [category,setCategory] = useState<any>();
 
+  // const { initialState } = useModel('@@initialState'); //获取初始值
+  // const { currentUser } = initialState || {};
+  async function getType(){
+    let res = await findDictionaryValueEnumByDicname("role");
+    if(res){
+      let categor = {};
+      for(let item of res){
+        categor[item.value] = item.label;
+      }
+      setCategory(categor)//列表字段
+      return res.map(item=>({label:item.label,value:item.value}));//查询字段
+    }
+  }
   /**
    * 页面权限处理
    */
@@ -85,7 +100,9 @@ const TableList: React.FC<{}> = () => {
     {
       title: 'id',            // 表头显示的名称
       dataIndex: 'id',       // 列数据在数据项中对应的路径，支持通过数组查询嵌套路径
-      hideInForm: true,
+      hideInSearch: true,      // 设置搜索栏是否显示
+      hideInTable: true,       // list页面不显示
+      hideInForm: true,       // 新增页面不显示
     },
     {
       title: '用户名',
@@ -109,22 +126,14 @@ const TableList: React.FC<{}> = () => {
       hideInTable: true,
     },
     {
-      title: '角色id',
-      dataIndex: 'roleId',
-      hideInSearch: true,      // 设置搜索栏是否显示
-      hideInTable: true,       // list页面不显示
-      hideInForm: true,       // 新增页面不显示
-    },
-    {
       title: '角色',
-      dataIndex: 'roleDescription',
-      hideInSearch: true,      // 设置搜索栏是否显示
-      hideInForm: true,
+      dataIndex: 'roleId',
+      valueEnum:category,//这一列是后端返回的数据，目前还没有找到好的方法可以直接让搜索框和table展示数据一致，只能外加一个valueEnum让table展示正确数据
+      request:async()=>getType(),
     },
     {
       title: '状态',
       dataIndex: 'status',
-      hideInForm: true,
       valueEnum:  {               // 当前列值的枚举
         0: { text: '正常', status: '0' },
         1: { text: '禁用', status: '1' }
@@ -200,24 +209,24 @@ const TableList: React.FC<{}> = () => {
         />
       </CreateForm>
       {stepFormValues && Object.keys(stepFormValues).length ? (
-      <UpdateForm
-        onSubmit={async (value) => {
-          const success = await handleUpdate(value);
-          if (success) {
+        <UpdateForm
+          onSubmit={async (value) => {
+            const success = await handleUpdate(value);
+            if (success) {
+              handleUpdateModalVisible(false);
+              setStepFormValues({});
+              if (actionRef.current) {
+                actionRef.current.reload();
+              }
+            }
+          }}
+          onCancel={() => {
             handleUpdateModalVisible(false);
             setStepFormValues({});
-            if (actionRef.current) {
-              actionRef.current.reload();
-            }
-          }
-        }}
-        onCancel={() => {
-          handleUpdateModalVisible(false);
-          setStepFormValues({});
-        }}
-        updateModalVisible={updateModalVisible}
-        values={stepFormValues}
-      />
+          }}
+          updateModalVisible={updateModalVisible}
+          values={stepFormValues}
+        />
       ) : null}
       <Drawer
         width={600}

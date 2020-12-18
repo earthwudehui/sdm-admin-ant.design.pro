@@ -36,20 +36,13 @@
           {
             path: '/FzBrandAdManage/FzBrandProject/list',
             component: './FzBrandAdManage/FzBrandProject/list',
-            name: '列表',
+            name: '项目列表',
             hideInMenu: true,
           },
-        ]
-      },
-      {
-        path: '/FzBrandAdManage/FzProjectAd',
-        name: '项目广告管理',
-        routes: [
-          { path: '/FzBrandAdManage/FzProjectAd', redirect: '/FzBrandAdManage/FzProjectAd/list' },
           {
-            path: '/FzBrandAdManage/FzProjectAd/list',
+            path: '/FzBrandAdManage/FzBrandProject/FzProjectAd/list',
             component: './FzBrandAdManage/FzProjectAd/list',
-            name: '列表',
+            name: '广告列表',
             hideInMenu: true,
           },
           {
@@ -59,8 +52,29 @@
             name: '新增',
             parentKeys: ['/FzBrandAdManage/FzBrandProject/list'],
           },
+
         ]
       },
+      // {
+      //   path: '/FzBrandAdManage/FzProjectAd',
+      //   name: '项目广告管理',
+      //   routes: [
+      //     { path: '/FzBrandAdManage/FzProjectAd', redirect: '/FzBrandAdManage/FzProjectAd/list' },
+      //     {
+      //       path: '/FzBrandAdManage/FzProjectAd/list',
+      //       component: './FzBrandAdManage/FzProjectAd/list',
+      //       name: '列表',
+      //       hideInMenu: true,
+      //     },
+      //     {
+      //       path: '/FzBrandAdManage/FzProjectAd/add',
+      //       component: './FzBrandAdManage/FzProjectAd/add',
+      //       hideInMenu: true,
+      //       name: '新增',
+      //       parentKeys: ['/FzBrandAdManage/FzBrandProject/list'],
+      //     },
+      //   ]
+      // },
 
     ],
   },

@@ -7,7 +7,7 @@ import ProForm, {
   ProFormSwitch
 } from '@ant-design/pro-form';
 import {TableListItem} from "@/services/FzBrandAdManageService/FzBrandProjectService/data";
-import {findDictionaryByProFormSelect} from "@/services/utile";
+import {findDictionaryValueEnumByDicname} from "@/services/utile";
 
 export interface FormValueType extends Partial<TableListItem> {
 
@@ -30,21 +30,17 @@ const CreateForm: React.FC<CreateFormProps> = (props) => {
     >
       <ProForm.Group>
         <ProFormSelect
-          width="l"
-          name="brandId"
+          width="m"
+          name="add_brandId"
           label="品牌"
-          // valueEnum={{
-          //   2007101804194321839: '佩妮',
-          //   2: '已解决',
-          // }}onValueChange
-          request={async () => await findDictionaryByProFormSelect("brand")}
+          request={async () => await findDictionaryValueEnumByDicname("brand")  }
           placeholder="清选择品牌信息"
           rules={[{ required: true, message: '清选择品牌信息' }]}
         />
-        <ProFormText width="m" name="projectName" label="项目名称" placeholder="请输入名称"
+        <ProFormText width="m" name="add_projectName" label="项目名称" placeholder="请输入名称"
                      rules={[{ required: true, message: '请输入至少四个字符！' , min: 4 }]}/>
-        <ProFormSwitch name="status" label="项目状态"  />
-        <ProFormTextArea width="m" name="remark" label="备注" placeholder="请输入名称" rules={[{ required: true, message: '请输入至少四个字符！' , min: 4 ,max:198}]}/>
+        <ProFormSwitch  name="add_status" label="项目状态"  />
+        <ProFormTextArea width="m" name="add_remark" label="备注" placeholder="请输入名称" rules={[{ required: true, message: '请输入至少四个字符！' , min: 4 ,max:198}]}/>
       </ProForm.Group>
 
     </DrawerForm>
