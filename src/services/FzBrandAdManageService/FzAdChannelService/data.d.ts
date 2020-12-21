@@ -1,4 +1,4 @@
-export interface TableListItemChannerl {
+export interface TableListItemChannel {
   id: number;
   brandId: string;
   channelId: string;
@@ -6,13 +6,14 @@ export interface TableListItemChannerl {
   adId:number;
   channelType: string;
   channelName: string;
+  type: string
   startDate: string;
   endDate: string;
   status: string;
   remark: string;
 }
 
-export interface TableListParamsChannerl {
+export interface TableListParamsChannel {
   id: number;
 
 

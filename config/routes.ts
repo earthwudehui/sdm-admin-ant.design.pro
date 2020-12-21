@@ -18,9 +18,18 @@
   },
   {
     path: '/DashboardAnalysis',
-    name: 'DashboardAnalysis',
+    name: '投放数据分析',
     icon: 'smile',
-    component: './DashboardAnalysis',
+    access: 'canAdmin',
+    hideInMenu: true,
+    routes: [
+      // { path: '/DashboardAnalysis/FzBrandAdAnalysis', redirect: '/DashboardAnalysis/FzBrandAdAnalysis' },
+      {
+        path: '/DashboardAnalysis/FzBrandAdAnalysis',
+        component: './DashboardAnalysis/FzBrandAdAnalysis',
+        name: '项目投放数据分析',
+      }
+    ]
   },
   {
     path: '/FzBrandAdManage',

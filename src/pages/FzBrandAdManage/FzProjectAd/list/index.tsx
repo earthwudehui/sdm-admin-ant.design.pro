@@ -1,19 +1,18 @@
 import React, {useState, useRef, useEffect} from 'react';
-import {Button, Divider, message, Space, Image, Upload, BackTop} from 'antd';
+import {Modal,Button, Divider, message, Space, Image, Upload, BackTop,Card, Descriptions } from 'antd';
 import { PageContainer } from '@ant-design/pro-layout';
 import ProTable, { ProColumns, ActionType } from '@ant-design/pro-table';
 import CreateForm from './components/CreateForm';
 import UpdateForm , { FormValueType } from './components/UpdateForm';
 import { TableListItem } from '@/services/FzBrandAdManageService/FzProjectAdService/data';
 import { query, save,update } from '@/services/FzBrandAdManageService/FzProjectAdService/service';
-import { PlusOutlined,LeftCircleTwoTone} from "@ant-design/icons";
+import { PlusOutlined,LeftCircleTwoTone,ExclamationCircleOutlined} from "@ant-design/icons";
 import { history,useParams } from 'umi';
 import { queryFzBrandProjectById } from '@/services/FzBrandAdManageService/FzBrandProjectService/service';
-import { queryChannerl,saveChannerl,updateChannerl } from '@/services/FzBrandAdManageService/FzAdChannelService/service';
-import { TableListItemChannerl } from '@/services/FzBrandAdManageService/FzAdChannelService/data';
-import CreateFormChannel, { FormValueTypeChannerl } from '@/pages/FzBrandAdManage/FzAdChannel/list/components/CreateFormChannel';
-
-
+import { queryChannel,saveChannel,updateChannel,deleteChannel } from '@/services/FzBrandAdManageService/FzAdChannelService/service';
+import { TableListItemChannel } from '@/services/FzBrandAdManageService/FzAdChannelService/data';
+import CreateFormChannel, { FormValueTypeChannel } from '@/pages/FzBrandAdManage/FzAdChannel/list/components/CreateFormChannel';
+import UpdateFormChannel from '@/pages/FzBrandAdManage/FzAdChannel/list/components/UpdateFormChannel';
 
 const style = {
   height: 40,
@@ -25,6 +24,8 @@ const style = {
   textAlign: 'center',
   fontSize: 14,
 };
+
+
 /**
  * 添加节点
  * @param fields
@@ -109,10 +110,11 @@ const TableList: React.FC<{}> = () => {
   /**
    * 子表格
    */
-  const [createModalVisibleChannerl, handleModalVisibleChannerl] = useState<boolean>(false); // 新建
-  const actionRefChannerl = useRef<ActionType>(); // 刷新使用
-
-
+  const [createModalVisibleChannel, handleModalVisibleChannel] = useState<boolean>(false); // 新建
+  const actionRefChannel = useRef<ActionType>(); // 刷新使用
+  const [updateModalVisibleChannel,handleUpdateModalVisibleChannel] = useState<boolean>(false); // 修改
+  const [stepFormValuesChannel, setStepFormValuesChannel] = useState({});   // 修改
+  const { confirm } = Modal;
   /**
    * 页面权限处理
    */
@@ -193,7 +195,7 @@ const TableList: React.FC<{}> = () => {
     },
   ];
   const expandedRowRender = (value) => {
-    const expandableColumns: ProColumns<TableListItemChannerl>[] = [
+    const expandableColumns: ProColumns<TableListItemChannel>[] = [
       {
         title: 'id',
         dataIndex: 'id',
@@ -231,12 +233,19 @@ const TableList: React.FC<{}> = () => {
           <>
             <a
               onClick={() => {
-                handleUpdateModalVisible(true);
-                setStepFormValues(record);
+                handleUpdateModalVisibleChannel(true);
+                setStepFormValuesChannel(record);
               }}
             >
               修改
             </a>
+            <Divider type="vertical" />
+            <a
+              onClick={() => {
+                handleDeleteChannel (record);
+              }}
+            >
+              删除</a>
           </>
         ),
       },
@@ -245,20 +254,21 @@ const TableList: React.FC<{}> = () => {
      * 添加节点
      * @param fields
      */
-    const handleAddChannerl = async (fields: FormValueTypeChannerl) => {
+    const handleAddChannel = async (fields: FormValueTypeChannel) => {
       const hide = message.loading('正在添加');
       const status = fields.status?0:1;
       var data = fields.dateTime.toString();
       const startDate = data.split(",")[0];
       const endDate = data.split(",")[1];
       try {
-        await saveChannerl({
+        await saveChannel({
           brandId: fields.brandId,          // brandId: fields.brandId.value,
           // projectId: fields.projectId,
           channelId: fields.channelId.value,
           channelName: fields.channelId.label,
           adId: fields.adId,
           channelType: fields.channelType,
+          type: fields.type,
           startDate:startDate,
           endDate: endDate,
           status:status,// +"" 为String，不加为int
@@ -278,13 +288,19 @@ const TableList: React.FC<{}> = () => {
      * 更新节点
      * @param fields
      */
-    const handleUpdateChannerl = async (fields: FormValueType) => {
+    const handleUpdateChannel = async (fields: FormValueTypeChannel) => {
       const hide = message.loading('正在配置');
       const status = fields.status?0:1;
+      var data = fields.dateTime.toString();
+      const startDate = data.split(",")[0];
+      const endDate = data.split(",")[1];
       try {
-        await update({
-          id: fields.id,
-          adName: fields.adName,
+        await updateChannel({
+          id: fields.id,          // brandId: fields.brandId.value,
+          channelType: fields.channelType,
+          type: fields.type,
+          startDate:startDate,
+          endDate: endDate,
           status:status,// +"" 为String，不加为int
           remark: fields.remark,
         });
@@ -298,15 +314,56 @@ const TableList: React.FC<{}> = () => {
       }
     };
 
+    /**
+     * 删除节点
+     * @param fields
+     */
+    const handleDeleteChannelFunction = async (fields: FormValueTypeChannel) => {
+      const hide = message.loading('正在删除');
+      try {
+        const success = await deleteChannel(
+          fields.id
+        );
+        hide();
+        message.success('删除成功');
+        if (success) {
+          if (actionRefChannel.current) {
+            actionRefChannel.current.reload();
+          }
+        }
+        return true;
+      } catch (error) {
+        hide();
+        message.error('删除失败请重试！');
+        return false;
+      }
+    };
+    const handleDeleteChannel = async (fields: FormValueTypeChannel) => {
+      confirm({
+        title: '请确认是否删除渠道统计?',
+        icon: <ExclamationCircleOutlined />,
+        content: fields.channelName,
+        okText: '是',
+        okType: 'danger',
+        cancelText: '否',
+        onOk() {
+          handleDeleteChannelFunction(fields);
+        },
+        onCancel() {
+        },
+      });
+    };
+
+
     return (
       <>
         <ProTable
           columns={expandableColumns}
-          actionRef={actionRefChannerl}      // 用于触发刷新操作等，看api
+          actionRef={actionRefChannel}      // 用于触发刷新操作等，看api
           params={{'adId':value.id}}
-          request={(params, sorter, filter) => queryChannerl({ ...params, sorter, filter })}  // 请求数据的地方，
+          request={(params, sorter, filter) => queryChannel({ ...params, sorter, filter })}  // 请求数据的地方，
           toolBarRender={() => [
-            <Button type="primary" onClick={() => handleModalVisibleChannerl(true)}>
+            <Button type="primary" onClick={() => handleModalVisibleChannel(true)}>
               <PlusOutlined /> 新增渠道
             </Button>,
           ]}
@@ -317,19 +374,40 @@ const TableList: React.FC<{}> = () => {
         />
         <CreateFormChannel
           onSubmit={async (value) => {
-            const success = await handleAddChannerl(value);
+            const success = await handleAddChannel(value);
             if (success) {
-              handleModalVisibleChannerl(false);
-              if (actionRefChannerl.current) {
-                actionRefChannerl.current.reload();
+              handleModalVisibleChannel(false);
+              if (actionRefChannel.current) {
+                actionRefChannel.current.reload();
               }
             }
           }
           }
-          onCancel={() => handleModalVisibleChannerl(false)}
+          onCancel={() => handleModalVisibleChannel(false)}
           values={value}
-          modalVisible={createModalVisibleChannerl}
+          modalVisible={createModalVisibleChannel}
         />
+        {stepFormValuesChannel && Object.keys(stepFormValuesChannel).length ? (
+          <UpdateFormChannel
+            onSubmit={async (value) => {
+              const success = await handleUpdateChannel(value);
+              if (success) {
+                handleUpdateModalVisibleChannel(false);
+                setStepFormValuesChannel({});
+                if (actionRefChannel.current) {
+                  actionRefChannel.current.reload();
+                }
+              }
+            }
+            }
+            onCancel={() => {
+              handleUpdateModalVisibleChannel(false);
+              setStepFormValuesChannel({});
+            }}
+            updateModalVisible={updateModalVisibleChannel}
+            values={stepFormValuesChannel}
+          />
+        ) : null}
     </>
     );
   };
@@ -337,7 +415,7 @@ const TableList: React.FC<{}> = () => {
     <>
       <PageContainer>
         <ProTable<TableListItem>      // 表格Pro组件
-          headerTitle={FzBrandProject.projectName}     // 表头
+          headerTitle="查询表格"       // 表头
           actionRef={actionRef}      // 用于触发刷新操作等，看api
           rowKey="id"              // 表格行 key 的取值，可以是字符串或一个函数
           search={{
@@ -347,13 +425,25 @@ const TableList: React.FC<{}> = () => {
           options={{                // 全屏
             search: false,          // 去除查询
           }}
+          tableExtraRender={(_, data) => (
+            <Card>
+              <Descriptions size="small" column={2}>
+                <Descriptions.Item label="项目名称">{FzBrandProject.projectName}</Descriptions.Item>
+                <Descriptions.Item >
+                  <Button type="primary"  onClick={() =>  history.goBack()}>
+                    <LeftCircleTwoTone />返回列表
+                  </Button>
+                </Descriptions.Item>
+              </Descriptions>
+            </Card>
+          )}
           // params={{history.location.query.brandId},{'projectId':history.location.query.projectId}}
           params={{'brandId':history.location.query.brandId,'projectId':history.location.query.projectId}}
           toolBarRender={() => [
-            <Button key="primary"  onClick={() =>  history.goBack()}>
-              返回列表
-              <LeftCircleTwoTone />
-            </Button>,
+            // <Button key="primary"  onClick={() =>  history.goBack()}>
+            //   返回列表
+            //   <LeftCircleTwoTone />
+            // </Button>,
             <Button type="primary" onClick={() => handleModalVisible(true)}>
               <PlusOutlined /> 新建
             </Button>,

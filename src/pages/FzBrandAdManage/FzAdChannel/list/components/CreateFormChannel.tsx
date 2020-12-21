@@ -5,18 +5,18 @@ import ProForm, {
   ProFormSwitch,
   ProFormText, ProFormDateRangePicker, ProFormSelect,
 } from '@ant-design/pro-form';
-import {TableListItemChannerl} from "@/services/FzBrandAdManageService/FzAdChannelService/data";
+import {TableListItemChannel} from "@/services/FzBrandAdManageService/FzAdChannelService/data";
 import {TableListItem} from "@/services/FzBrandAdManageService/FzProjectAdService/data";
 import {findDictionaryValueEnumByDicname} from "@/services/utile";
 import { Form, Select, } from 'antd';
 
-export interface FormValueTypeChannerl extends Partial<TableListItemChannerl> {
+export interface FormValueTypeChannel extends Partial<TableListItemChannel> {
   dateTime:string
 }
 interface CreateFormChannelProps {
   modalVisible: boolean;
   onCancel: () => void;
-  onSubmit: (values: FormValueTypeChannerl) => void;
+  onSubmit: (values: FormValueTypeChannel) => void;
   values: Partial<TableListItem>;
 }
 
@@ -74,7 +74,7 @@ const CreateFormChannel: React.FC<CreateFormChannelProps> = (props) => {
        />
        <ProFormSelect
          width="m"
-         name="channelType"
+         name="type"
          options={[
            {
              value: '0',

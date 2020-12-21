@@ -1,8 +1,7 @@
 import React, {useState, useRef} from 'react';
-import { Button, Divider, message,Drawer } from 'antd';
+import { Button, Divider, message } from 'antd';
 import { PageContainer } from '@ant-design/pro-layout';
-import ProTable, { ProColumns, ActionType } from '@ant-design/pro-table';
-import ProDescriptions from '@ant-design/pro-descriptions';
+import ProTable, { ProColumns, ActionType,TableDropdown  } from '@ant-design/pro-table';
 import CreateForm from './components/CreateForm';
 import UpdateForm , { FormValueType } from './components/UpdateForm';
 import { TableListItem } from '@/services/FzBrandAdManageService/FzBrandProjectService/data';
@@ -65,9 +64,25 @@ const handleUpdate = async (fields: FormValueType) => {
 //  * 跳转详情页
 //  * @param id
 //  */
-const detail = function (record){
+const detail = function (record:TableListItem){
   history.push('/FzBrandAdManage/FzBrandProject/FzProjectAd/list?brandId='+record.brandId+"&projectId="+record.id);
 };
+const detailData = function (record:TableListItem){
+  history.push('/DashboardAnalysis/FzBrandAdAnalysis?brandId='+record.brandId+"&projectId="+record.id);
+};
+
+const onSelecthandle= function(record:TableListItem,key:string){
+
+  if(key=='detailData'){
+    detailData(record);
+  }else if(key=="detailDataAnalysis"){
+    alert("detailDataAnalysis敬请期待");
+  }else{
+    alert("不存在");
+  }
+
+}
+
 
 const TableList: React.FC<{}> = () => {
   const [createModalVisible, handleModalVisible] = useState<boolean>(false); // 新建
@@ -113,13 +128,11 @@ const TableList: React.FC<{}> = () => {
       // hideInTable: true,       // list页面不显示
       valueEnum:category,//这一列是后端返回的数据，目前还没有找到好的方法可以直接让搜索框和table展示数据一致，只能外加一个valueEnum让table展示正确数据
       request:async()=>getType(),
+      // fixed: 'left',
     },
     {
       title: '项目名称',
       dataIndex: 'projectName',
-      render: (dom, entity) => {
-        return <a onClick={() => setRow(entity)}>{dom}</a>;
-      },
     },
     {
       title: '备注',
@@ -140,6 +153,7 @@ const TableList: React.FC<{}> = () => {
       title: '操作',
       dataIndex: 'option',
       valueType: 'option',
+      // fixed: 'right',
       render: (_, record) => (
         <>
           <a
@@ -158,12 +172,20 @@ const TableList: React.FC<{}> = () => {
           >
             广告管理</a>
           <Divider type="vertical" />
-          <a
-            onClick={() => {
-              detail(record);
-            }}
-          >
-            数据查询</a>
+          {/*<a*/}
+          {/*  onClick={() => {*/}
+          {/*    detailData(record);*/}
+          {/*  }}*/}
+          {/*>*/}
+          {/*  数据查询</a>*/}
+          <TableDropdown
+            key="actionGroup"
+            onSelect = {(key) => {onSelecthandle(record,key)}}
+            menus={[
+              { key: 'detailData', name: '数据查询' },
+              { key: 'detailDataAnalysis', name: '数据分析报告' },
+            ]}
+          />
         </>
 
       ),
@@ -182,6 +204,7 @@ const TableList: React.FC<{}> = () => {
         options={{                // 全屏
           search: false,          // 去除查询
         }}
+        // scroll={{ x: 997 }}
         toolBarRender={() => [
           <Button type="primary" onClick={() => handleModalVisible(true)}>
             <PlusOutlined /> 新建
@@ -224,28 +247,6 @@ const TableList: React.FC<{}> = () => {
         values={stepFormValues}
       />
       ) : null}
-      <Drawer
-        width={600}
-        visible={!!row}
-        onClose={() => {
-          setRow(undefined);
-        }}
-        closable={false}
-      >
-        {row?.projectName && (
-          <ProDescriptions<TableListItem>
-            column={2}
-            title={row?.projectName}
-            request={async () => ({
-              data: row || {},
-            })}
-            params={{
-              id: row?.projectName,
-            }}
-            columns={columns}
-          />
-        )}
-      </Drawer>
     </PageContainer>
   );
 };
