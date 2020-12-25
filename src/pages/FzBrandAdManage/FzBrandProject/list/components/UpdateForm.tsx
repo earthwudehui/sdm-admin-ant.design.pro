@@ -44,8 +44,6 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => {
     children.push(<Option key={k}>{RoldValue[k]}</Option>);
   }
 
-
-
   const [formVals, setFormVals] = useState<FormValueType>({
     id: props.values.id,
     projectName: props.values.projectName,

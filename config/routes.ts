@@ -11,23 +11,26 @@
     ],
   },
   {
-    path: '/welcome',
-    name: 'welcome',
-    icon: 'smile',
-    component: './Welcome',
-  },
-  {
     path: '/DashboardAnalysis',
-    name: '投放数据分析',
+    name: '平台数据分析',
     icon: 'smile',
-    access: 'canAdmin',
-    hideInMenu: true,
     routes: [
-      // { path: '/DashboardAnalysis/FzBrandAdAnalysis', redirect: '/DashboardAnalysis/FzBrandAdAnalysis' },
+      // { path: '/DashboardAnalysis', redirect: '/welconme/DashboardAnalysis' },
+      {
+        path: '/DashboardAnalysis/welconme',
+        component: './DashboardAnalysis/welconme',
+        name: 'welcome',
+      },
       {
         path: '/DashboardAnalysis/FzBrandAdAnalysis',
         component: './DashboardAnalysis/FzBrandAdAnalysis',
         name: '项目投放数据分析',
+        hideInMenu: true,
+      },
+      {
+        path: '/DashboardAnalysis/ChannelFlowsAnalysis',
+        component: './DashboardAnalysis/ChannelFlowsAnalysis',
+        name: '渠道流量数据分析',
       }
     ]
   },
@@ -35,7 +38,6 @@
     path: '/FzBrandAdManage',
     name: '分众广告投放管理',
     icon: 'TeamOutlined',
-    access: 'canAdmin',
     routes: [
       {
         path: '/FzBrandAdManage/FzBrandProject',
@@ -54,14 +56,6 @@
             name: '广告列表',
             hideInMenu: true,
           },
-          {
-            path: '/FzBrandAdManage/FzProjectAd/add',
-            component: './FzBrandAdManage/FzProjectAd/add',
-            hideInMenu: true,
-            name: '新增',
-            parentKeys: ['/FzBrandAdManage/FzBrandProject/list'],
-          },
-
         ]
       },
       // {
@@ -134,7 +128,7 @@
   },
   {
     path: '/',
-    redirect: '/welcome',
+    redirect: '/DashboardAnalysis/welconme',
   },
   {
     component: './404',

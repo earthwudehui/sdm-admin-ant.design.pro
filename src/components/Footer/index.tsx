@@ -24,6 +24,12 @@ export default () => (
         href: 'https://ant.design',
         blankTarget: true,
       },
+      {
+        key: 'google',
+        title: '谷歌浏览器 ',
+        href: 'https://www.google.cn/chrome/',
+        blankTarget: true,
+      },
     ]}
   />
 );

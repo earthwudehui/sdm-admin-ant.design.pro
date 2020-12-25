@@ -49,7 +49,7 @@ export async function getInitialState(): Promise<{
       settings: defaultSettings,
     };
   }
-  // 如果是登录页，并且token未失效不用，在登录
+  // 如果是登录页，并且token未失效不用再登录
   if(history.location.pathname === '/user/login'&&token!=null) {
     goto();
   }
@@ -95,6 +95,7 @@ const codeMessage = {
   406: '请求的格式不可得。',
   410: '请求的资源被永久删除，且不会再得到的。',
   422: '当创建一个对象时，发生一个验证错误。',
+  441: '登录凭证已失效，请重新登录。',
   500: '服务器发生错误，请检查服务器。',
   502: '网关错误。',
   503: '服务不可用，服务器暂时过载或维护。',
@@ -108,22 +109,18 @@ const errorHandler = (error: ResponseError) => {
   const { response } = error;
 
   if (response && response.status) {
-
     // token 失效
-    if(response.status ===401){
+    if(response.status ===401||response.status ===403){
       // 目前没有续期操作
       sessionStorage.removeItem("token");// 删除token
     }
-
     const errorText = codeMessage[response.status] || response.statusText;
     const { status, url } = response;
-
     notification.error({
       message: `请求错误 ${status}: ${url}`,
       description: errorText,
     });
   }
-
   if (!response) {
     notification.error({
       description: '您的网络发生异常，无法连接服务器',
@@ -132,6 +129,22 @@ const errorHandler = (error: ResponseError) => {
   }
   throw error;
 };
+
+const demoResponseInterceptors = (response: Response, options) => {
+// token 失效
+    if(response.status ===401||response.status ===441){
+      // 目前没有续期操作
+      sessionStorage.removeItem("token");// 删除token
+      const errorText = codeMessage[response.status] || response.statusText;
+      notification.error({
+        message: `请求错误`,
+        description: errorText,
+      });
+      history.push('/user/login?redirect='+history.location.pathname);//保留请求跳转
+    }
+  return response;
+}
+
 
 export const request: RequestConfig = {
   errorHandler,
@@ -145,4 +158,5 @@ export const request: RequestConfig = {
       return { url, options };
     }
   ],
+  responseInterceptors: [demoResponseInterceptors],
 };

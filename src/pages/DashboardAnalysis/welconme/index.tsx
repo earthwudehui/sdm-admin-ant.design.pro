@@ -48,7 +48,6 @@ const DemoLine: React.FC = () => {
         console.log('close');
       }}
     >
-      <PageContainer>
         <div ><Button onClick={handleClick}>切换全屏</Button></div>
         <Row gutter={24}>
           <Col  span={6}>
@@ -80,9 +79,6 @@ const DemoLine: React.FC = () => {
             </ProCard>
           </Col>
         </Row>
-      </PageContainer>
-
-
     </Fullscreen>
   )
 
