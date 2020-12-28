@@ -1,14 +1,9 @@
-import {
-  LockTwoTone,
-  MailTwoTone,
-  MobileTwoTone,
-  UserOutlined,
-} from '@ant-design/icons';
+import { LockTwoTone, MailTwoTone, MobileTwoTone, UserOutlined } from '@ant-design/icons';
 import logo from '@/assets/logo.svg';
-import { Alert,message, Tabs } from 'antd';
+import { Alert, message, Tabs } from 'antd';
 import React, { useState } from 'react';
 import ProForm, { ProFormCaptcha, ProFormText } from '@ant-design/pro-form';
-import { useIntl, Link, history} from 'umi';
+import { useIntl, Link, history } from 'umi';
 import Footer from '@/components/Footer';
 import { fakeAccountLogin, getFakeCaptcha, LoginParamsType } from '@/services/login';
 import styles from './index.less';
@@ -53,6 +48,7 @@ const Login: React.FC<{}> = () => {
       if (msg.status === 'ok') {
         message.success('登录成功！');
         sessionStorage.setItem('token', msg.token); // 保存token-userid
+
         goto();
         return;
       } // 如果失败去设置用户错误信息
@@ -68,8 +64,7 @@ const Login: React.FC<{}> = () => {
   const { status, type: loginType } = userLoginState;
   return (
     <div className={styles.container}>
-      <div className={styles.lang}>
-      </div>
+      <div className={styles.lang}></div>
       <div className={styles.content}>
         <div className={styles.top}>
           <div className={styles.header}>
@@ -227,8 +222,7 @@ const Login: React.FC<{}> = () => {
               style={{
                 marginBottom: 24,
               }}
-            >
-            </div>
+            ></div>
           </ProForm>
         </div>
       </div>
